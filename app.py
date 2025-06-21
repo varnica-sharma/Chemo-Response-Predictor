@@ -13,6 +13,14 @@ encoder = joblib.load("models/onehot_encoder.pkl")
 label_enc_drug = joblib.load("models/drug_encoder.pkl")
 label_enc_cell = joblib.load("models/cell_encoder.pkl")
 
+import streamlit as st
+
+st.set_page_config(
+    page_title="Personalized Chemotherapy Response Predictor",
+    page_icon="💊",
+    layout="wide"
+)
+
 # Title
 st.title("💊 Personalized Chemotherapy Response Prediction using Genomic & Drug Metadata (GDSC)")
 
