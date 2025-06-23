@@ -80,20 +80,20 @@ if st.sidebar.button("🔮 Predict IC50"):
     st.write("Here are the top 5 most influential features in the model's decision:")
 
     # SHAP wrapper
-    def model_predict(x_arr):
+    # Prepare SHAP explainer for current input
+    def model_predict(x):
         with torch.no_grad():
-            xt = torch.tensor(x_arr, dtype=torch.float32)
-            return model(xt).numpy()
+            x_tensor = torch.tensor(x, dtype=torch.float32)
+            preds = model(x_tensor).numpy()
+        return preds
 
-    # SHAP explainer using background from training set
-    background = np.tile(x, (100, 1))
-    explainer = shap.Explainer(model_predict, background)
+    explainer = shap.Explainer(model_predict, np.array([x]))
     shap_values = explainer(np.array([x]))
 
-    # SHAP bar plot (top 5)
-    fig, ax = plt.subplots()
-    shap.plots.bar(shap_values[0], max_display=5, show=False)
-    st.pyplot(fig)
+    # Display SHAP
+    st.markdown("### 🧠 What Influenced This Prediction?")
+    st.write("Here are the top most influential features in the model's decision:")
+    shap.plots.waterfall(shap_values[0], max_display=10)
 
 # Footer
 st.markdown("---")
