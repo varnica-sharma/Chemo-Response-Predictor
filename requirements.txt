@@ -1,6 +1,7 @@
 torch
 streamlit
 scikit-learn
+matplotlib
 shap
 pandas
 numpy
