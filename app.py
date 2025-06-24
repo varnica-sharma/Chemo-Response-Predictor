@@ -81,18 +81,21 @@ if st.sidebar.button("🔮 Predict IC50"):
 
     # SHAP wrapper
     # SHAP: Explain current prediction
+    # SHAP: Explain current prediction
     def model_predict(x):
         with torch.no_grad():
             x_tensor = torch.tensor(x, dtype=torch.float32)
-            preds = model(x_tensor).numpy()
-        return preds
-
-    explainer = shap.Explainer(model_predict, np.array([x]))
+            return model(x_tensor).numpy()
+    
+    # SHAP background and explanation
+    background = np.tile(x, (100, 1))  # replicate input as fake background
+    explainer = shap.Explainer(model_predict, background)
     shap_values = explainer(np.array([x]))
-
+    
+    # SHAP waterfall plot
     st.markdown("### 🧠 What Influenced This Prediction?")
     st.write("Here are the top most influential features in the model's decision:")
-
+    
     shap.plots.waterfall(shap_values[0], max_display=10)
 
 
