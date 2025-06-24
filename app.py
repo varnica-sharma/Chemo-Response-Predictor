@@ -75,35 +75,17 @@ if st.sidebar.button("🔮 Predict IC50"):
     </div>
     """, unsafe_allow_html=True)
 
-    # SHAP Explainability (with human-readable feature names)
-    st.markdown("### 🧠 What Influenced This Prediction?")
-    st.write("Below is how each input feature contributed to the predicted IC50:")
-    
-    def model_predict(x_arr):
-        with torch.no_grad():
-            xt = torch.tensor(x_arr, dtype=torch.float32)
-            return model(xt).numpy()
-    
-    # Use replicated background for stability
-    background = np.tile(x, (100, 1))
-    explainer = shap.Explainer(model_predict, background)
-    shap_values = explainer(np.array([x]))
-    
-    # --- Create proper feature names ---
-    input_features = [
-        f"Cell Line = {cell_line}",
-        f"Drug = {drug_name}",
-        "Z-Score = 0.0",
-        "Max_Conc = 10.0",
-    ]
-    
-    # One-hot feature names from encoder
-    encoded_feature_names = encoder.get_feature_names_out(["Tissue", "TCGA_Classification"])
-    input_features.extend(encoded_feature_names)
-    
-    # --- Waterfall plot ---
-    fig, ax = plt.subplots(figsize=(10, 4))
-    shap.plots.waterfall(shap_values[0], max_display=10, show=False)
+    # 🧬 Metadata Feature Visual
+    st.markdown("### 🧠 Input Metadata Features Used in Prediction")
+    st.write("The following encoded features represent the patient's tissue and cancer classification:")
+
+    meta_labels = encoder.get_feature_names_out(["Tissue", "TCGA_Classification"])
+    meta_values = meta_onehot[0]
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.barh(meta_labels, meta_values, color="#1f77b4")
+    ax.set_xlabel("Encoded Value")
+    ax.set_title("One-Hot Encoded Metadata Used in Prediction")
     st.pyplot(fig)
 
 # Footer
