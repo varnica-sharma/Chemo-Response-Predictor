@@ -75,35 +75,35 @@ if st.sidebar.button("🔮 Predict IC50"):
     </div>
     """, unsafe_allow_html=True)
 
-        # SHAP Explainability
+    # SHAP Explainability (with human-readable feature names)
     st.markdown("### 🧠 What Influenced This Prediction?")
-    st.write("Here are the top 5 most influential features in the model's decision:")
-
-    # SHAP wrapper
-    def model_predict(x):
+    st.write("Below is how each input feature contributed to the predicted IC50:")
+    
+    def model_predict(x_arr):
         with torch.no_grad():
-            x_tensor = torch.tensor(x, dtype=torch.float32)
-            preds = model(x_tensor).numpy()
-        return preds
-
-    # Background for explainer
+            xt = torch.tensor(x_arr, dtype=torch.float32)
+            return model(xt).numpy()
+    
+    # Use replicated background for stability
     background = np.tile(x, (100, 1))
     explainer = shap.Explainer(model_predict, background)
     shap_values = explainer(np.array([x]))
-
-    # Feature names
-    feature_names = ["cell_enc", "drug_enc", "Z_score", "Max_Conc"] + list(encoder.get_feature_names_out(["Tissue", "TCGA_Classification"]))
-
-    # Manual bar plot
-    shap_vals = shap_values.values[0]
-    top_idx = np.argsort(np.abs(shap_vals))[-5:][::-1]
-    top_features = [feature_names[i] for i in top_idx]
-    top_shap_vals = shap_vals[top_idx]
-
-    fig, ax = plt.subplots()
-    ax.barh(top_features[::-1], top_shap_vals[::-1], color='salmon')
-    ax.set_xlabel("SHAP Value (Impact on IC50)")
-    ax.set_title("Top 5 Influential Features")
+    
+    # --- Create proper feature names ---
+    input_features = [
+        f"Cell Line = {cell_line}",
+        f"Drug = {drug_name}",
+        "Z-Score = 0.0",
+        "Max_Conc = 10.0",
+    ]
+    
+    # One-hot feature names from encoder
+    encoded_feature_names = encoder.get_feature_names_out(["Tissue", "TCGA_Classification"])
+    input_features.extend(encoded_feature_names)
+    
+    # --- Waterfall plot ---
+    fig, ax = plt.subplots(figsize=(10, 4))
+    shap.plots.waterfall(shap_values[0], max_display=10, show=False)
     st.pyplot(fig)
 
 # Footer
