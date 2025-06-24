@@ -75,29 +75,36 @@ if st.sidebar.button("🔮 Predict IC50"):
     </div>
     """, unsafe_allow_html=True)
 
-    # SHAP Explainability
+        # SHAP Explainability
     st.markdown("### 🧠 What Influenced This Prediction?")
     st.write("Here are the top 5 most influential features in the model's decision:")
 
     # SHAP wrapper
-    # SHAP: Explain current prediction
-    # SHAP: Explain current prediction
     def model_predict(x):
         with torch.no_grad():
             x_tensor = torch.tensor(x, dtype=torch.float32)
-            return model(x_tensor).numpy()
-    
-    # SHAP background and explanation
-    background = np.tile(x, (100, 1))  # replicate input as fake background
+            preds = model(x_tensor).numpy()
+        return preds
+
+    # Background for explainer
+    background = np.tile(x, (100, 1))
     explainer = shap.Explainer(model_predict, background)
     shap_values = explainer(np.array([x]))
-    
-    # SHAP waterfall plot
-    st.markdown("### 🧠 What Influenced This Prediction?")
-    st.write("Here are the top most influential features in the model's decision:")
-    
-    shap.plots.waterfall(shap_values[0], max_display=10)
 
+    # Feature names
+    feature_names = ["cell_enc", "drug_enc", "Z_score", "Max_Conc"] + list(encoder.get_feature_names_out(["Tissue", "TCGA_Classification"]))
+
+    # Manual bar plot
+    shap_vals = shap_values.values[0]
+    top_idx = np.argsort(np.abs(shap_vals))[-5:][::-1]
+    top_features = [feature_names[i] for i in top_idx]
+    top_shap_vals = shap_vals[top_idx]
+
+    fig, ax = plt.subplots()
+    ax.barh(top_features[::-1], top_shap_vals[::-1], color='salmon')
+    ax.set_xlabel("SHAP Value (Impact on IC50)")
+    ax.set_title("Top 5 Influential Features")
+    st.pyplot(fig)
 
 # Footer
 st.markdown("---")
