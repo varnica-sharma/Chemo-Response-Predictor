@@ -8,7 +8,7 @@ Built with **PyTorch** and deployed as an interactive **Streamlit web app**, thi
 
 ## 🚀 Demo
 
-🔗 [Click here to try the live app](https://drug-response-predictor.streamlit.app)
+🔗 [Click here to try the live app](https://chemo-response-predictor.streamlit.app)
 
 ---
 
