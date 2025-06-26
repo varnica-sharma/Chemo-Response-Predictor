@@ -75,17 +75,27 @@ if st.sidebar.button("🔮 Predict IC50"):
     </div>
     """, unsafe_allow_html=True)
 
-    # 🧬 Metadata Feature Visual
-    st.markdown("### 🧠 Input Metadata Features Used in Prediction")
-    st.write("The following encoded features represent the patient's tissue and cancer classification:")
+    # Interpretation of IC50
+    st.markdown("### 🧠 Interpretation of Prediction")
 
-    meta_labels = encoder.get_feature_names_out(["Tissue", "TCGA_Classification"])
-    meta_values = meta_onehot[0]
+    if pred < 4:
+        st.success("🔹 The predicted IC50 indicates **high sensitivity** to the selected drug. This means the drug is likely to be effective at lower concentrations.")
+    elif pred < 6:
+        st.warning("🟡 The predicted IC50 indicates **moderate sensitivity**. The drug may require higher doses to be effective.")
+    else:
+        st.error("🔺 The predicted IC50 indicates **resistance**. The cancer cells are likely to be less responsive to this drug.")
 
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.barh(meta_labels, meta_values, color="#1f77b4")
-    ax.set_xlabel("Encoded Value")
-    ax.set_title("One-Hot Encoded Metadata Used in Prediction")
+    # Visual gauge bar
+    fig, ax = plt.subplots(figsize=(6, 1.2))
+    ax.axvspan(0, 4, color='green', alpha=0.4, label='Sensitive')
+    ax.axvspan(4, 6, color='yellow', alpha=0.4, label='Moderate')
+    ax.axvspan(6, 10, color='red', alpha=0.4, label='Resistant')
+    ax.axvline(pred, color='black', linestyle='--', linewidth=2, label=f'Predicted = {round(pred, 2)}')
+
+    ax.set_xlim(0, 10)
+    ax.set_yticks([])
+    ax.set_xlabel("IC50 Value")
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.6), ncol=3, frameon=False)
     st.pyplot(fig)
 
 # Footer
