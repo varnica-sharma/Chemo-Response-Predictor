@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from model import IC50Net
 
 # Load assets
@@ -75,29 +76,65 @@ if st.sidebar.button("🔮 Predict IC50"):
     </div>
     """, unsafe_allow_html=True)
 
-    # Interpretation of IC50
+    # Interpretation Section
     st.markdown("### 🧠 Interpretation of Prediction")
-
-    if pred < 4:
-        st.success("🔹 The predicted IC50 indicates **high sensitivity** to the selected drug. This means the drug is likely to be effective at lower concentrations.")
-    elif pred < 6:
-        st.warning("🟡 The predicted IC50 indicates **moderate sensitivity**. The drug may require higher doses to be effective.")
+    if pred <= 4:
+        interpretation = "high sensitivity"
+        note = "This means the drug is likely to be effective at lower concentrations."
+    elif 4 < pred <= 6:
+        interpretation = "moderate sensitivity"
+        note = "Effectiveness may vary; dosage adjustment might be needed."
     else:
-        st.error("🔺 The predicted IC50 indicates **resistance**. The cancer cells are likely to be less responsive to this drug.")
+        interpretation = "low sensitivity"
+        note = "The drug might not be effective at standard dosages."
 
-    # Visual gauge bar
-    fig, ax = plt.subplots(figsize=(6, 1.2))
-    ax.axvspan(0, 4, color='green', alpha=0.4, label='Sensitive')
-    ax.axvspan(4, 6, color='yellow', alpha=0.4, label='Moderate')
-    ax.axvspan(6, 10, color='red', alpha=0.4, label='Resistant')
-    ax.axvline(pred, color='black', linestyle='--', linewidth=2, label=f'Predicted = {round(pred, 2)}')
+    st.markdown(f"""
+    <div style='background-color: #174D30; padding: 1rem; border-radius: 10px; color: white;'>
+    <b>🔷 The predicted IC50 indicates <u>{interpretation}</u> to the selected drug.</b><br>
+    {note}
+    </div>
+    """, unsafe_allow_html=True)
 
-    ax.set_xlim(0, 10)
-    ax.set_yticks([])
-    ax.set_xlabel("IC50 Value")
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.6), ncol=3, frameon=False)
-    st.pyplot(fig)
+    # Plotly-based Interpretation Chart
+    x_vals = [0, 4, 6, 10]
+    colors = ["#b6e3a8", "#fffac8", "#ffb3b3"]
+    labels = ["Sensitive", "Moderate", "Resistant"]
+
+    fig = go.Figure()
+    for i in range(3):
+        fig.add_shape(
+            type="rect",
+            x0=x_vals[i], x1=x_vals[i + 1], y0=0, y1=1,
+            fillcolor=colors[i],
+            line=dict(width=0),
+            layer='below'
+        )
+        fig.add_annotation(
+            x=(x_vals[i] + x_vals[i + 1]) / 2,
+            y=0.5,
+            text=labels[i],
+            showarrow=False,
+            font=dict(size=14)
+        )
+
+    fig.add_vline(
+        x=pred,
+        line_dash="dash",
+        line_color="black",
+        annotation_text=f"Predicted = {round(pred, 2)}",
+        annotation_position="top"
+    )
+
+    fig.update_yaxes(visible=False)
+    fig.update_layout(
+        height=250,
+        margin=dict(l=20, r=20, t=20, b=20),
+        title="IC50 Sensitivity Interpretation",
+        plot_bgcolor="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 # Footer
 st.markdown("---")
-st.markdown("🔬 Powered by PyTorch • Streamlit • SHAP • GDSC")
+st.markdown("🔬 Powered by PyTorch • Streamlit • GDSC")
