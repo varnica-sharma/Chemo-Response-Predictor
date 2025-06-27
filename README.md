@@ -27,6 +27,26 @@ Built with **PyTorch** and deployed as an interactive **Streamlit web app**, thi
 
 ---
 
+## 💡 What is IC50?
+
+> IC50 is the concentration of a drug that is required for 50% inhibition of cell viability.  
+> Lower IC50 values indicate **higher sensitivity**, while higher values indicate **drug resistance**.
+
+---
+
+## 🔍 How It Works
+
+1. **User selects** drug, cell line, tissue type, and TCGA classification.
+2. Input features are encoded (label + one-hot + scaled).
+3. The encoded vector is passed through a trained PyTorch model.
+4. The predicted IC50 is shown along with an **interpretation plot**:
+   - 🟩 **Sensitive:** IC50 < 4
+   - 🟨 **Moderate:** 4 ≤ IC50 < 6
+   - 🟥 **Resistant:** IC50 ≥ 6
+
+---
+
+
 ## 📁 Dataset
 
 - Source: [GDSC Portal](https://www.cancerrxgene.org/)
