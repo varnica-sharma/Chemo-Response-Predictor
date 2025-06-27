@@ -79,6 +79,7 @@ A simple feedforward neural network (PyTorch):
 
 - Python 3.11
 - PyTorch
-- Pandas, Scikit-learn
+- Numpy, Pandas, Scikit-learn
 - Streamlit (for deployment)
-- SHAP (for explainability)
+- Plotly (for explainability)
+- Matplotlib
